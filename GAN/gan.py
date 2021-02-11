@@ -127,21 +127,22 @@ class GAN(object):
                 # samples minibatch from noise prior p_g(z)
                 z = torch.rand((self.batch_size, self.z_dim)).to(self.device)
                 self.D_optimizer.zero_grad()
+                # trains on real data
                 # D(x^{(i)})
                 D_real = self.D(x)
                 D_real_loss = self.BCE_loss(D_real, self.real)
-                G = self.G(z)
+                # trains on fake data
                 # D(G(z^{(i)}))
-                D_fake = self.D(G)
+                D_fake = self.D(self.G(z))
                 D_fake_loss = self.BCE_loss(D_fake, self.fake)
                 D_loss = D_real_loss + D_fake_loss
                 # updates the discriminator by ascending its stochastic gradient
                 D_loss.backward()
                 self.D_optimizer.step()
                 self.G_optimizer.zero_grad()
-                G = self.G(z)
+                # trains on fake data
                 # D(G(z^{(i)}))
-                D_fake = self.D(G)
+                D_fake = self.D(self.G(z))
                 G_loss = self.BCE_loss(D_fake, self.real)
                 # updates the generator by descending its stochastic gradient
                 G_loss.backward()
